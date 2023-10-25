@@ -6,6 +6,7 @@ window.addEventListener('load', function() {
     let enemies = [];
     let score = 0;
     let gameOver = false;
+    const fullScreenButton = document.getElementById('fullScreenButton');
 
     class InputHandler{
         constructor(){
@@ -81,25 +82,23 @@ window.addEventListener('load', function() {
         }
 
         draw(context){
-            context.strokeStyle = 'white';
-            context.strokeRect(this.x, this.y, this.width, this.height);
-            context.beginPath();
-            context.arc(this.x + this.width/2, this.y + this.height/2, this.width/2,
-            0, Math.PI * 2);
-            context.stroke();
-            // context.fillStyle = 'white';
-            // context.fillRect(this.x, this.y, this.width, this.height);
+            // context.lineWidth = 5;
+            // context.strokeStyle = 'white';
+            // context.beginPath();
+            // context.arc(this.x + this.width/2, this.y + this.height/2 + 20, this.width/3,
+            // 0, Math.PI * 2);
+            // context.stroke();
             context.drawImage(this.image, 
                 this.frameX * this.width, this.frameY * this.height, this.width, this.height,
                 this.x, this.y, this.width, this.height);
         }
-        update(input, deltaTime){
+        update(input, deltaTime, enemies){
             //collision detection
             enemies.forEach(enemy => {
-                const dx = (enemy.x + enemy.width/2) - (this.x + this.width/2);
-                const dy = (enemy.y  + enemy.height/2) - (this.y + this.height/2);
+                const dx = (enemy.x + enemy.width/2 - 20) - (this.x + this.width/2);
+                const dy = (enemy.y  + enemy.height/2) - (this.y + this.height/2 + 20);
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                if(distance < enemy.width/2 + this.width/2){
+                if(distance < enemy.width/3 + this.width/3){
                     gameOver = true;
                 }
             })
@@ -185,15 +184,15 @@ window.addEventListener('load', function() {
             this.markedToBeDeleted = false;
         }
         draw(context){
-            context.beginPath();
-            context.arc(this.x + this.width/2, this.y + this.height/2, this.width/2,
-            0, Math.PI * 2);
-            context.stroke();
-            context.strokeStyle = 'white';
-            context.strokeRect(this.x, this.y, this.width, this.height);
             context.drawImage(this.image, 
                 this.frameX * this.width, 0, this.width, this.height,
                 this.x, this.y, this.width, this.height);
+            // context.lineWidth = 5;
+            // context.strokeStyle = 'white'; 
+            // context.beginPath();
+            // context.arc(this.x + this.width/2 -20, this.y + this.height/2, this.width/3,
+            // 0, Math.PI * 2);
+            // context.stroke();
         }
         update(deltaTime){
             if(this.frameTimer > this.frameInterval){
@@ -253,6 +252,17 @@ window.addEventListener('load', function() {
         animate(0);
     }
 
+    function toggleFullScreen(){
+        if(!document.fullscreenElement){
+            canvas.requestFullscreen().catch(err => {
+                alert(`Error, can't enable full-screen mode: ${err.message}`);
+            });
+        } else{
+            document.exitFullscreen();
+        }
+    }
+    fullScreenButton.addEventListener("click", toggleFullScreen);
+
     const input = new InputHandler();
     const player = new Player(canvas.width, canvas.height);
     const background = new Background(canvas.width, canvas.height);
@@ -267,7 +277,7 @@ window.addEventListener('load', function() {
         lastTime = timeStamp;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         background.draw(ctx);
-        // background.update();
+        background.update();
         player.draw(ctx);
         player.update(input, deltaTime, enemies);
         handleEnemies(deltaTime);
